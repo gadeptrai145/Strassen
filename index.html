@@ -1,11 +1,41 @@
-<button onclick="Module.ccall('main', 'number', ['number'], [0])">
-    Chạy mô phỏng
-</button>
-<pre id="output"></pre>
-<script>
-  Module = {
-    print: (text) => {
-      document.getElementById('output').textContent += text + "\n";
-    }
-  };
-</script>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Ma trận Strassen Web</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Mô phỏng Nhân Ma trận Strassen/Winograd trên Web</h1>
+
+    <label>Nhập cấp số k (n = 2^k, 1-12): </label>
+    <input type="number" id="inputK" min="1" max="12" value="4">
+    <button id="runBtn">Chạy mô phỏng</button>
+
+    <pre id="output"></pre>
+
+    <script src="matran.js"></script>
+    <script>
+        const outputEl = document.getElementById("output");
+
+        // Chờ WASM load xong
+        Module.onRuntimeInitialized = () => {
+            // Redirect printf từ C ra <pre>
+            Module.print = (text) => {
+                outputEl.textContent += text + "\n";
+            };
+
+            document.getElementById("runBtn").onclick = () => {
+                outputEl.textContent = "Đang tính toán...\n";
+                const k = parseInt(document.getElementById("inputK").value);
+                if (isNaN(k) || k < 1 || k > 12) {
+                    alert("Vui lòng nhập k hợp lệ (1-12)");
+                    return;
+                }
+                // Gọi hàm C runSimulation
+                Module.ccall('runSimulation', 'void', ['number'], [k]);
+            };
+        };
+    </script>
+</body>
+</html>
